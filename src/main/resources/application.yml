@@ -1,0 +1,45 @@
+spring:
+  application:
+    name: stream-binder-rabbit-sample
+  cloud:
+    function.definition: paymentConsumer;salesConsumer
+    stream:
+      #      input-bindings: paymentConsumer;salesConsumer
+      rabbit:
+        bindings:
+          salesConsumer-in-0.consumer:
+            queue-name-group-only: true
+            bindingRoutingKey: sales.key
+          paymentConsumer-in-0.consumer:
+            queue-name-group-only: true
+            bindingRoutingKey: payment.key
+
+      bindings:
+        paymentConsumer-in-0:
+          group: payment.queue
+          destination: amq.topic
+          binder: payment-consumer
+
+        salesConsumer-in-0:
+          group: sales.queue
+          destination: amq.topic
+          binder: sales-consumer
+
+      binders:
+        sales-consumer:
+          type: rabbit
+          environment.spring.rabbitmq:
+            host: localhost
+            port: 5672
+            username: admin
+            password: admin
+            virtual-host: sales
+
+        payment-consumer:
+          type: rabbit
+          environment.spring.rabbitmq:
+            host: localhost
+            port: 5672
+            username: admin
+            password: admin
+            virtual-host: payment
